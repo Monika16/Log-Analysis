@@ -16,13 +16,11 @@ sql = '''
 # query to find most popular article author with 
 #    total no. of views for the author's articles.
 sql1 = '''
-    select authors.name, sum(auview.num) as views from authors join
-    (select authors.id, auid.num from authors join 
+    select authors.name, sum(auid.num) as views from authors join
     (select articles.author, arview.num
     from articles join arview
     on articles.title = arview.title) as auid 
-    on authors.id = auid.author) as auview
-    on authors.id = auview.id
+    on authors.id = auid.author
     group by authors.id
     order by views desc
 '''

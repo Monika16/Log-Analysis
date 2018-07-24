@@ -2,7 +2,7 @@
 
 ## Files in the Project
 1. newsdatadb.py - contains SQl Queries in python code.
-2. output.doc - contains output of the program.
+2. output.txt - contains output of the program.
 
 ## Requirement for Execution
 1. Python 

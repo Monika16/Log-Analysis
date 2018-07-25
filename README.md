@@ -2,6 +2,7 @@
 
 ## Description of Project
   Python script uses psycopg2 to query a mock PostgreSQL database for a news website. 
+  
   `news` Database is structured with 3 tables:
   
   	1. articles: Columns:
@@ -23,7 +24,8 @@
   		4. status - html status code
   		5. time - timestamp when the article was viewed
   		6. id - primary key represents id for each log
-  Python script answers 3 queries.
+  Python script answers 3 queries-
+  
   	1. What are the most popular three articles of all time? 
   	2. Who are the most popular article authors of all time?
   	3. On which days did more than 1% of requests lead to errors?

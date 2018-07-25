@@ -1,8 +1,9 @@
 # Log-Analysis
 
 ## Files in the Project
-1. newsdatadb.py - contains SQl Queries in python code.
-2. output.txt - contains output of the program.
+1. newsdatadb.py - contains SQL Queries in python code.
+2. create_views.sql - contail SQL Query to create View.
+3. output.txt - contains output of the program.
 
 ## Requirement for Execution
 1. Python 
@@ -14,8 +15,9 @@
 1. Download the project.
 2. Place newsdatadb.py in the same folder as newsdata.sql
 3. Change directory to the folder where newsdatadb.py is present.
-4. Execute by command `python newsdatadb.py` in the command prompt.
-5. Review the output.
+4. Execute `psql -d news -f create_views.sql` command to create view arview.
+5. Execute by command `python newsdatadb.py` in the command prompt.
+6. Review the output.
 
 ## Queries written
 1. What are the most popular three articles of all time?

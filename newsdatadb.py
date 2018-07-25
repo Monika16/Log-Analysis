@@ -1,80 +1,105 @@
+#!usr/bin/env python
+
 import psycopg2
 from datetime import datetime
 
 DBNAME = "news"
-
-# view to find articles with its no. of views
-sql = '''
-    create view arview as 
-    select articles.title, count(*) as num
-    from articles join log 
-    on articles.slug = substring(log.path from 10)
-    group by articles.title
-    order by num desc
-'''
-
 # query to find most popular article author with 
-#    total no. of views for the author's articles.
+# total no. of views for the author's articles.
 sql1 = '''
-    select authors.name, sum(auid.num) as views from authors join
-    (select articles.author, arview.num
-    from articles join arview
-    on articles.title = arview.title) as auid 
-    on authors.id = auid.author
-    group by authors.id
-    order by views desc
+    SELECT authors.name, sum(auid.num) AS VIEWS 
+    FROM authors 
+    JOIN
+        (SELECT articles.author, arview.num
+         FROM articles JOIN arview
+         ON articles.title = arview.title) 
+    AS auid 
+    ON authors.id = auid.author
+    GROUP BY authors.id
+    ORDER BY views DESC
 '''
 
 # query to find date 
 # where more than 1% requests lead to error
 sql2 = '''
-    select date, round(fail_percent,1) from
-    (select tottab.dat as date, 
-     ((failtab.fail*100.0)/tottab.total)as fail_percent from
-    (select date(time) as dat, count(*) as fail from log 
-     where status!='200 OK' group by date(time))as failtab right join
-    (select date(time)as dat, count(*) as total 
-     from log group by date(time))as tottab
-    on failtab.dat = tottab.dat 
-    order by failtab.dat)as percent_failure
-    where fail_percent > 1.0;
+    SELECT to_char(date, 'FMMonth DD, YYYY'), round(fail_percent,1) FROM
+        (SELECT tottab.dat AS date, 
+                ((failtab.fail*100.0)/tottab.total)AS fail_percent 
+        FROM (
+            SELECT date(time) AS dat, count(*) AS fail 
+            FROM log 
+            WHERE status!='200 OK' 
+            GROUP BY date(time))
+            AS failtab 
+            RIGHT JOIN (
+                SELECT date(time)AS dat, count(*) AS total 
+                FROM log 
+                GROUP BY date(time))
+            AS tottab
+            ON failtab.dat = tottab.dat 
+            ORDER BY failtab.dat)
+        AS percent_failure
+    WHERE fail_percent > 1.0;
 '''
-
-# method to print the results in a fomatted form
 
 
 def printresults(result):
+    """method to print the results in a fomatted form"""
     for row in result:
         title = row[0]
         views = row[1]
-        print(str(title)+' - '+str(views)+' views')
+        print('{} - {} views'.format(title, views))
     return
 
-# establish database connection
-db = psycopg2.connect(database=DBNAME)
-c = db.cursor()
 
-# to create view
-c.execute(sql)
-# to find three most popular articles with the no.of views
-c.execute("select * from arview limit 3")
-results = c.fetchall()
-print("\nThree most popular articles:")
-printresults(results)
+def db_connect():
+    """Establish database connection with database news and cursor for database.
+       Returns:
+            Cursor c """
+    db = psycopg2.connect(database=DBNAME)
+    c = db.cursor()
+    return db, c
 
-# to find the most popular author
-c.execute(sql1)
-results = c.fetchall()
-print("\nMost popular article authors:")
-printresults(results)
 
-# days on which more than 1% requests lead to error
-c.execute(sql2)
-results = c.fetchall()
-print("\nDays when more than 1% requests lead to error: ")
-for row in results:
-    date = row[0]
-    error = row[1]
-    print(datetime.strftime(date, '%B %d,%Y')+' - '+str(error)+'% errors')
-print('')
-db.close()
+def execute_query(query):
+    """To execute given query
+       Returns:
+            results of the query"""
+    db, c = db_connect()
+    c.execute(query)
+    results = c.fetchall()
+    db.close()
+    return results
+
+
+def print_top_articles():
+    """Prints top 3 articles"""
+    query = "SELECT * FROM arview LIMIT 3"
+    results = execute_query(query)
+    print("\nThree most popular articles:")
+    printresults(results)
+
+
+def print_top_authors():
+    """to find the most popular author"""
+    query = sql1
+    results = execute_query(query)
+    print("\nMost popular article authors:")
+    printresults(results)
+
+
+def print_errors_over_one():  
+    """days on which more than 1% requests lead to error"""
+    query = sql2
+    results = execute_query(query)
+    print("\nDays when more than 1% requests lead to error: ")
+    for row in results:
+        date = row[0]
+        error = row[1]
+        print(str(date)+' - '+str(error)+'% errors')
+
+if __name__ == '__main__':
+    print_top_articles()
+    print_top_authors()
+    print_errors_over_one()
+    print('')

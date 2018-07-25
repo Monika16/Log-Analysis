@@ -2,8 +2,7 @@
 
 ## Description of Project
   Python script uses psycopg2 to query a mock PostgreSQL database for a news website. 
-  `news` Database is structured as:
-  	It has 3 tables
+  `news` Database is structured with 3 tables:
   	1. articles: Columns:
   		1. author - it is author id and a foreign key.
   		2. title - title of article

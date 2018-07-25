@@ -2,7 +2,7 @@
 
 ## Files in the Project
 1. newsdatadb.py - contains SQL Queries in python code.
-2. create_views.sql - contail SQL Query to create View.
+2. create_views.sql - contains SQL Query to create View.
 3. output.txt - contains output of the program.
 
 ## Requirement for Execution

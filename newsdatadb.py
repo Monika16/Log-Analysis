@@ -4,42 +4,43 @@ import psycopg2
 from datetime import datetime
 
 DBNAME = "news"
-# query to find most popular article author with 
-# total no. of views for the author's articles.
+"""query to find most popular article author with
+total no. of views for the author's articles."""
 sql1 = '''
-    SELECT authors.name, sum(auid.num) AS VIEWS 
-    FROM authors 
+    SELECT authors.name, sum(auid.num) AS VIEWS
+    FROM authors
     JOIN
         (SELECT articles.author, arview.num
          FROM articles JOIN arview
-         ON articles.title = arview.title) 
-    AS auid 
+         ON articles.title = arview.title)
+    AS auid
     ON authors.id = auid.author
     GROUP BY authors.id
     ORDER BY views DESC
 '''
 
-# query to find date 
-# where more than 1% requests lead to error
+
+"""query to find date
+where more than 1% requests lead to error"""
 sql2 = '''
     SELECT to_char(date, 'FMMonth DD, YYYY'), round(fail_percent,1) FROM
-        (SELECT tottab.dat AS date, 
-                ((failtab.fail*100.0)/tottab.total)AS fail_percent 
+        (SELECT tottab.dat AS date,
+            ((failtab.fail*100.0)/tottab.total)AS fail_percent
         FROM (
-            SELECT date(time) AS dat, count(*) AS fail 
-            FROM log 
-            WHERE status!='200 OK' 
+            SELECT date(time) AS dat, count(*) AS fail
+            FROM log
+            WHERE status!='200 OK'
             GROUP BY date(time))
-            AS failtab 
+            AS failtab
             RIGHT JOIN (
-                SELECT date(time)AS dat, count(*) AS total 
-                FROM log 
+                SELECT date(time)AS dat, count(*) AS total
+                FROM log
                 GROUP BY date(time))
-            AS tottab
-            ON failtab.dat = tottab.dat 
+                AS tottab
+                ON failtab.dat = tottab.dat
             ORDER BY failtab.dat)
         AS percent_failure
-    WHERE fail_percent > 1.0;
+    WHERE fail_percent > 1.0
 '''
 
 
@@ -53,7 +54,8 @@ def printresults(result):
 
 
 def db_connect():
-    """Establish database connection with database news and cursor for database.
+    """Establish database connection with database news
+        and cursor for database.
        Returns:
             Cursor c """
     db = psycopg2.connect(database=DBNAME)
@@ -88,7 +90,7 @@ def print_top_authors():
     printresults(results)
 
 
-def print_errors_over_one():  
+def print_errors_over_one():
     """days on which more than 1% requests lead to error"""
     query = sql2
     results = execute_query(query)
@@ -97,6 +99,7 @@ def print_errors_over_one():
         date = row[0]
         error = row[1]
         print(str(date)+' - '+str(error)+'% errors')
+
 
 if __name__ == '__main__':
     print_top_articles()
